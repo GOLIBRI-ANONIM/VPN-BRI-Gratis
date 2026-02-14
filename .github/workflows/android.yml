@@ -24,18 +24,18 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Optimasi Gradle (Tips Copilot)
+    - name: Optimasi RAM 5.5GB (Verdict Copilot)
       run: |
         mkdir -p ~/.gradle
-        echo "org.gradle.jvmargs=-Xmx3g -XX:+UseG1GC" >> ~/.gradle/gradle.properties
+        # Pakai ram 5.5GB agar tidak OOM saat Dexing
+        echo "org.gradle.jvmargs=-Xmx5500m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ParallelRefProcEnabled" >> ~/.gradle/gradle.properties
         echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
-        echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+        echo "org.gradle.workers.max=4" >> ~/.gradle/gradle.properties
 
-    - name: Perbaiki Kode (The Master Config)
+    - name: Perbaiki Kode (AppConfig Sync)
       run: |
-        # Buat satu file AppConfig yang super lengkap
-        mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang
-        cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
+        find V2rayNG/app/src -name "AppConfig.kt" | while read file; do
+          cat <<INNEREOF > "$file"
         package com.v2ray.ang
         object AppConfig {
             const val ANG_PACKAGE = "com.v2ray.ang"
@@ -96,22 +96,14 @@ jobs:
             const val WIRE_GUARD = "wireguard"
         }
         INNEREOF
-        
-        # Sync ke semua variant
-        mkdir -p V2rayNG/app/src/fdroid/java/com/v2ray/ang
-        mkdir -p V2rayNG/app/src/playstore/java/com/v2ray/ang
-        cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/fdroid/java/com/v2ray/ang/AppConfig.kt
-        cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/playstore/java/com/v2ray/ang/AppConfig.kt
+        done
 
-    - name: Build APK Final (Speed Mode)
+    - name: Build APK Final
       working-directory: ./V2rayNG
-      run: |
-        echo "sdk.dir=$ANDROID_HOME" > local.properties
-        chmod +x gradlew
-        ./gradlew assembleFdroidDebug --build-cache --parallel
+      run: ./gradlew assembleFdroidDebug --no-daemon --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V26-POWER
+        name: VPN-BRI-V29-ULTRA
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
