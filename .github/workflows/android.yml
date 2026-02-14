@@ -24,9 +24,16 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode (The Final Boss Solution)
+    - name: Optimasi Gradle (Tips Copilot)
       run: |
-        # Buat satu file AppConfig yang super lengkap di folder utama
+        mkdir -p ~/.gradle
+        echo "org.gradle.jvmargs=-Xmx3g -XX:+UseG1GC" >> ~/.gradle/gradle.properties
+        echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
+        echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+
+    - name: Perbaiki Kode (The Master Config)
+      run: |
+        # Buat satu file AppConfig yang super lengkap
         mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang
         cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
         package com.v2ray.ang
@@ -90,21 +97,21 @@ jobs:
         }
         INNEREOF
         
-        # Salin file ini ke semua variant (fdroid dan playstore) agar tidak ada celah
+        # Sync ke semua variant
         mkdir -p V2rayNG/app/src/fdroid/java/com/v2ray/ang
         mkdir -p V2rayNG/app/src/playstore/java/com/v2ray/ang
         cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/fdroid/java/com/v2ray/ang/AppConfig.kt
         cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/playstore/java/com/v2ray/ang/AppConfig.kt
 
-    - name: Build APK Final
+    - name: Build APK Final (Speed Mode)
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
         chmod +x gradlew
-        ./gradlew assembleFdroidDebug --stacktrace
+        ./gradlew assembleFdroidDebug --build-cache --parallel
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V25-FINAL
+        name: VPN-BRI-V26-POWER
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
