@@ -24,10 +24,18 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode Otomatis
+    - name: Perbaiki Kode Semua Varian
       run: |
-        mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang/
-        cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
+        # Buat daftar folder tujuan yang mungkin diminta sistem
+        FOLDERS=(
+          "V2rayNG/app/src/main/java/com/v2ray/ang"
+          "V2rayNG/app/src/fdroid/java/com/v2ray/ang"
+          "V2rayNG/app/src/playstore/java/com/v2ray/ang"
+        )
+        
+        for dir in "${FOLDERS[@]}"; do
+          mkdir -p "$dir"
+          cat <<INNEREOF > "$dir/AppConfig.kt"
         package com.v2ray.ang
         object AppConfig {
             const val TAG_PROXY = "proxy"
@@ -63,21 +71,21 @@ jobs:
             const val WIREGUARD_LOCAL_MTU = 1420
         }
         INNEREOF
+        done
 
-    - name: Siapkan Lingkungan (Wajib 9.1.0)
+    - name: Siapkan Lingkungan
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        # Paksa balik ke 9.1.0 karena sistem memintanya
         sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK Final
+    - name: Build APK (Hanya Satu Varian Biar Cepat)
       working-directory: ./V2rayNG
-      run: ./gradlew assembleDebug -x lint -x test --stacktrace
+      run: ./gradlew assembleFdroidDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V19
-        path: V2rayNG/app/build/outputs/apk/debug/*.apk
+        name: VPN-BRI-V20
+        path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
