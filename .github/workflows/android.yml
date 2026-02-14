@@ -27,7 +27,7 @@ jobs:
     - name: Perbaiki Kode Secara Massal
       run: |
         mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang/
-        # Membuat file AppConfig yang LEBIH LENGKAP agar semua Unresolved Reference hilang
+        # Membuat file AppConfig versi paling lengkap
         cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
         package com.v2ray.ang
         object AppConfig {
@@ -100,6 +100,11 @@ jobs:
             const val DNS_QUAD9_ADDRESSES = "9.9.9.9"
             const val DNS_YANDEX_DOMAIN = "dns.yandex.ru"
             const val DNS_YANDEX_ADDRESSES = "77.88.8.8"
+            // Variabel Tambahan yang Sering Menghilangkan Error
+            const val UPLINK = "uplink"
+            const val DOWNLINK = "downlink"
+            const val MSG_STATE_RESTART_SUCCESS = 15
+            const val BROADCAST_ACTION_ACTIVITY = "com.v2ray.ang.action.activity"
         }
         INNEREOF
 
@@ -107,16 +112,15 @@ jobs:
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        # Paksa Gradle 9.1.0 lagi
         sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK Final Bismillah
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-Super-Gratis-v16
+        name: VPN-BRI-Final-v17
         path: V2rayNG/app/build/outputs/apk/debug/*.apk
