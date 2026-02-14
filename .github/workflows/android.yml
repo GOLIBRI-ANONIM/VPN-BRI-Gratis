@@ -27,21 +27,38 @@ jobs:
     - name: Optimasi RAM 5.5GB (Verdict Copilot)
       run: |
         mkdir -p ~/.gradle
-        echo "org.gradle.jvmargs=-Xmx5500m -XX:+UseG1GC" >> ~/.gradle/gradle.properties
-        echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
-        # Nonaktifkan incremental sesuai saran Copilot agar build bersih
-        echo "kotlin.incremental=false" >> ~/.gradle/gradle.properties
-
-    # STEP PERBAIKI KODE (AppConfig) DIHAPUS TOTAL AGAR TIDAK ERROR
+        cat >> ~/.gradle/gradle.properties << EOF
+        org.gradle.jvmargs=-Xmx5500m -Xms2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch
+        org.gradle.parallel=true
+        org.gradle.workers.max=4
+        kotlin.incremental=false
+        kotlin.compiler.execution.strategy=in-process
+        android.dexOptions.incremental=true
+        android.enableJetifier=true
+        EOF
 
     - name: Build APK Final
       working-directory: ./V2rayNG
       run: |
         chmod +x gradlew
-        ./gradlew clean assembleFdroidDebug --no-daemon --stacktrace
+        ./gradlew clean assembleFdroidDebug \
+          --no-daemon \
+          --stacktrace \
+          --build-cache \
+          -P org.gradle.jvmargs="-Xmx5500m"
       
-    - name: Upload APK
+    - name: Upload APK on Success
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: VPN-BRI-V33-SUCCESS
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
+
+    - name: Upload Build Logs on Failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Failure-Logs
+        path: |
+          V2rayNG/build/reports/
+          V2rayNG/app/build/reports/
