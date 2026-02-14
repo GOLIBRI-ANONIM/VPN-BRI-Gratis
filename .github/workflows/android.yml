@@ -18,27 +18,64 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache: gradle
 
     - name: Ambil Jantung VPN
       run: |
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
+    - name: Perbaiki Kode yang Hilang
+      run: |
+        # Membuat folder jika belum ada
+        mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang/
+        
+        # Membuat file AppConfig minimalis supaya error "Unresolved reference" hilang
+        cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
+        package com.v2ray.ang
+        object AppConfig {
+            const val TAG_PROXY = "proxy"
+            const val TAG_DIRECT = "direct"
+            const val TAG_BLOCKED = "block"
+            const val TAG_DNS = "dns"
+            const val LOOPBACK = "127.0.0.1"
+            const val PORT_SOCKS = "10808"
+            const val DEFAULT_PORT = 443
+            const val DEFAULT_LEVEL = 0
+            const val DEFAULT_NETWORK = "tcp"
+            const val DEFAULT_SECURITY = "auto"
+            const val BROADCAST_ACTION_SERVICE = "com.v2ray.ang.action.service"
+            const val MSG_STATE_STOP = 1
+            const val MSG_STATE_START_SUCCESS = 2
+            const val MSG_STATE_START_FAILURE = 3
+            const val MSG_STATE_STOP_SUCCESS = 4
+            const val MSG_STATE_RESTART = 5
+            const val MSG_MEASURE_DELAY = 6
+            const val MSG_MEASURE_DELAY_SUCCESS = 7
+            const val MSG_REGISTER_CLIENT = 8
+            const val MSG_UNREGISTER_CLIENT = 9
+            const val MSG_STATE_RUNNING = 10
+            const val MSG_STATE_NOT_RUNNING = 11
+            const val MSG_STATE_START = 12
+            const val RAY_NG_CHANNEL_ID = "v2rayng_channel"
+            const val RAY_NG_CHANNEL_NAME = "v2rayNG"
+            const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
+            const val WIREGUARD_LOCAL_MTU = 1420
+        }
+        INNEREOF
+
     - name: Siapkan Lingkungan
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        # Paksa ke Gradle 9.1.0 sesuai permintaan error tadi
         sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK (Jalan Tengah)
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-Super-Gratis-Final
+        name: VPN-BRI-Super-Gratis-v15
         path: V2rayNG/app/build/outputs/apk/debug/*.apk
