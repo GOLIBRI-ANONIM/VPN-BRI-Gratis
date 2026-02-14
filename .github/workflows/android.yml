@@ -13,7 +13,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-        submodules: 'recursive' # Ini kunci supaya core VPN-nya ikut ke-download
+        submodules: 'recursive'
 
     - name: set up JDK 17
       uses: actions/setup-java@v4
@@ -23,9 +23,10 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      run: chmod +x V2rayNG/gradlew
 
     - name: Build with Gradle
+      working-directory: ./V2rayNG
       run: ./gradlew assembleDebug --stacktrace
 
     - name: Upload APK
