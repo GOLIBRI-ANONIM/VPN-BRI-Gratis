@@ -24,11 +24,11 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode (The Master Config)
+    - name: Perbaiki Kode (The Final Boss Solution)
       run: |
-        # Cari semua lokasi AppConfig.kt dan suntikkan kode yang sudah diperbaiki
-        find V2rayNG/app/src -name "AppConfig.kt" | while read file; do
-          cat <<INNEREOF > "$file"
+        # Buat satu file AppConfig yang super lengkap di folder utama
+        mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang
+        cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
         package com.v2ray.ang
         object AppConfig {
             const val ANG_PACKAGE = "com.v2ray.ang"
@@ -89,17 +89,22 @@ jobs:
             const val WIRE_GUARD = "wireguard"
         }
         INNEREOF
-        done
+        
+        # Salin file ini ke semua variant (fdroid dan playstore) agar tidak ada celah
+        mkdir -p V2rayNG/app/src/fdroid/java/com/v2ray/ang
+        mkdir -p V2rayNG/app/src/playstore/java/com/v2ray/ang
+        cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/fdroid/java/com/v2ray/ang/AppConfig.kt
+        cp V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt V2rayNG/app/src/playstore/java/com/v2ray/ang/AppConfig.kt
 
-    - name: Bersihkan Cache dan Build
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
         chmod +x gradlew
-        ./gradlew clean assembleFdroidDebug -x lint -x test --stacktrace
+        ./gradlew assembleFdroidDebug --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V24-SUCCESS
+        name: VPN-BRI-V25-FINAL
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
