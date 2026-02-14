@@ -13,10 +13,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: gradle
 
@@ -29,11 +29,11 @@ jobs:
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        # Paksa Gradle pakai versi stabil (8.7)
-        sed -i 's/gradle-9.2.1-bin.zip/gradle-8.7-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
+        # Paksa ke Gradle 9.1.0 sesuai permintaan error tadi
+        sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK (Mode Stabil)
+    - name: Build APK (Jalan Tengah)
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
