@@ -1,4 +1,4 @@
-name: Build VPN BRI Super Gratis
+name: Build VPN BRI - Log Hunter
 
 on:
   push:
@@ -24,15 +24,7 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Optimasi RAM 5.5GB (Verdict Copilot)
-      run: |
-        mkdir -p ~/.gradle
-        # Pakai ram 5.5GB agar tidak OOM saat Dexing
-        echo "org.gradle.jvmargs=-Xmx5500m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ParallelRefProcEnabled" >> ~/.gradle/gradle.properties
-        echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
-        echo "org.gradle.workers.max=4" >> ~/.gradle/gradle.properties
-
-    - name: Perbaiki Kode (AppConfig Sync)
+    - name: Perbaiki Kode (AppConfig)
       run: |
         find V2rayNG/app/src -name "AppConfig.kt" | while read file; do
           cat <<INNEREOF > "$file"
@@ -98,12 +90,16 @@ jobs:
         INNEREOF
         done
 
-    - name: Build APK Final
+    - name: Build and Capture Log
       working-directory: ./V2rayNG
-      run: ./gradlew assembleFdroidDebug --no-daemon --stacktrace
-      
-    - name: Upload APK
+      run: |
+        # Sesuai saran Copilot: Simpan log ke file
+        ./gradlew assembleFdroidDebug --no-daemon -i 2>&1 | tee build_detailed.log
+
+    - name: Upload APK & Logs
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V29-ULTRA
-        path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
+        name: Build-Result-Misi31
+        path: |
+          V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
+          V2rayNG/build_detailed.log
