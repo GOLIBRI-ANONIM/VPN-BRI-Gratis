@@ -1,4 +1,4 @@
-name: Build VPN BRI - Kotlin Fixer
+name: Build VPN BRI - Original Source Fix
 
 on:
   push:
@@ -24,89 +24,24 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Optimasi & Pembersihan (Saran Copilot)
+    - name: Optimasi RAM 5.5GB (Verdict Copilot)
       run: |
         mkdir -p ~/.gradle
-        echo "org.gradle.jvmargs=-Xmx5500m" >> ~/.gradle/gradle.properties
-        # Matikan optimasi Kotlin yang sering bikin error di CI
+        echo "org.gradle.jvmargs=-Xmx5500m -XX:+UseG1GC" >> ~/.gradle/gradle.properties
+        echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
+        # Nonaktifkan incremental sesuai saran Copilot agar build bersih
         echo "kotlin.incremental=false" >> ~/.gradle/gradle.properties
-        echo "kotlin.compiler.execution.strategy=in-process" >> ~/.gradle/gradle.properties
 
-    - name: Perbaiki Kode (AppConfig)
-      run: |
-        find V2rayNG/app/src -name "AppConfig.kt" | while read file; do
-          cat <<INNEREOF > "$file"
-        package com.v2ray.ang
-        object AppConfig {
-            const val ANG_PACKAGE = "com.v2ray.ang"
-            const val TAG_PROXY = "proxy"
-            const val TAG_DIRECT = "direct"
-            const val TAG_BLOCKED = "block"
-            const val TAG_DNS = "dns"
-            const val TAG_DOMESTIC_DNS = "domestic_dns"
-            const val LOOPBACK = "127.0.0.1"
-            const val PORT_SOCKS = "10808"
-            const val PORT_HTTP = "10809"
-            const val DEFAULT_PORT = 443
-            const val DEFAULT_LEVEL = 0
-            const val DEFAULT_NETWORK = "tcp"
-            const val DEFAULT_SECURITY = "auto"
-            const val BROADCAST_ACTION_SERVICE = "com.v2ray.ang.action.service"
-            const val MSG_STATE_STOP = 1
-            const val MSG_STATE_START_SUCCESS = 2
-            const val MSG_STATE_START_FAILURE = 3
-            const val MSG_STATE_STOP_SUCCESS = 4
-            const val MSG_STATE_RESTART = 5
-            const val MSG_MEASURE_DELAY = 6
-            const val MSG_MEASURE_DELAY_SUCCESS = 7
-            const val MSG_REGISTER_CLIENT = 8
-            const val MSG_UNREGISTER_CLIENT = 9
-            const val MSG_STATE_RUNNING = 10
-            const val MSG_STATE_NOT_RUNNING = 11
-            const val MSG_STATE_START = 12
-            const val MSG_STATE_START_FAILURE_TYPE = 13
-            const val MSG_STATE_STOP_FAILURE = 14
-            const val RAY_NG_CHANNEL_ID = "v2rayng_channel"
-            const val RAY_NG_CHANNEL_NAME = "v2rayNG"
-            const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
-            const val WIREGUARD_LOCAL_MTU = 1420
-            const val TAG = "v2rayNG"
-            const val PREF_MODE = "pref_mode"
-            const val PREF_VPN_DNS = "pref_vpn_dns"
-            const val PREF_SOCKS_PORT = "pref_socks_port"
-            const val PREF_HTTP_PORT = "pref_http_port"
-            const val PREF_ALLOW_INSECURE = "pref_allow_insecure"
-            const val PREF_MUX_ENABLED = "pref_mux_enabled"
-            const val PREF_FRAGMENT_ENABLED = "pref_fragment_enabled"
-            const val SUBSCRIPTION_AUTO_UPDATE = "pref_subscription_auto_update"
-            const val VPN = "VPN"
-            const val HTTP = "http"
-            const val TLS = "tls"
-            const val HY2 = "hy2"
-            const val DNS_DIRECT = "1.1.1.1"
-            const val DNS_PROXY = "8.8.8.8"
-            const val DELAY_TEST_URL = "https://www.google.com/generate_204"
-            const val VPN_MTU = 1500
-            const val VMESS = "vmess"
-            const val VLESS = "vless"
-            const val SHADOWSOCKS = "shadowsocks"
-            const val TROJAN = "trojan"
-            const val SOCKS = "socks"
-            const val TUIC = "tuic"
-            const val WIRE_GUARD = "wireguard"
-        }
-        INNEREOF
-        done
+    # STEP PERBAIKI KODE (AppConfig) DIHAPUS TOTAL AGAR TIDAK ERROR
 
-    - name: Build APK (Tanpa Optimasi Kotlin)
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: |
         chmod +x gradlew
-        ./gradlew clean assembleFdroidDebug --stacktrace --no-daemon
-
-    - name: Upload Logs on Failure
-      if: failure()
+        ./gradlew clean assembleFdroidDebug --no-daemon --stacktrace
+      
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Error-Stacktrace-Misi32
-        path: V2rayNG/app/build/reports/problems/
+        name: VPN-BRI-V33-SUCCESS
+        path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
