@@ -24,17 +24,11 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode (Full Config)
+    - name: Perbaiki Kode (Dosis Maksimal)
       run: |
-        FOLDERS=(
-          "V2rayNG/app/src/main/java/com/v2ray/ang"
-          "V2rayNG/app/src/fdroid/java/com/v2ray/ang"
-          "V2rayNG/app/src/playstore/java/com/v2ray/ang"
-        )
-        
-        for dir in "${FOLDERS[@]}"; do
-          mkdir -p "$dir"
-          cat <<INNEREOF > "$dir/AppConfig.kt"
+        # Cari semua lokasi AppConfig.kt secara otomatis
+        find V2rayNG/app/src -name "AppConfig.kt" | while read file; do
+          cat <<INNEREOF > "$file"
         package com.v2ray.ang
         object AppConfig {
             const val ANG_PACKAGE = "com.v2ray.ang"
@@ -69,8 +63,6 @@ jobs:
             const val RAY_NG_CHANNEL_NAME = "v2rayNG"
             const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
             const val WIREGUARD_LOCAL_MTU = 1420
-            
-            // Tambahan untuk memperbaiki error log tadi
             const val TAG = "v2rayNG"
             const val PREF_MODE = "pref_mode"
             const val PREF_VPN_DNS = "pref_vpn_dns"
@@ -88,6 +80,13 @@ jobs:
             const val DNS_PROXY = "8.8.8.8"
             const val DELAY_TEST_URL = "https://www.google.com/generate_204"
             const val VPN_MTU = 1500
+            const val VMESS = "vmess"
+            const val VLESS = "vless"
+            const val SHADOWSOCKS = "shadowsocks"
+            const val TROJAN = "trojan"
+            const val SOCKS = "socks"
+            const val TUIC = "tuic"
+            const val WIRE_GUARD = "wireguard"
         }
         INNEREOF
         done
@@ -106,5 +105,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V21-Sukses
+        name: VPN-BRI-V23-FINAL
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
