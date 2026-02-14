@@ -1,4 +1,4 @@
-name: Build VPN BRI - Log Hunter
+name: Build VPN BRI - Kotlin Fixer
 
 on:
   push:
@@ -23,6 +23,14 @@ jobs:
       run: |
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
+
+    - name: Optimasi & Pembersihan (Saran Copilot)
+      run: |
+        mkdir -p ~/.gradle
+        echo "org.gradle.jvmargs=-Xmx5500m" >> ~/.gradle/gradle.properties
+        # Matikan optimasi Kotlin yang sering bikin error di CI
+        echo "kotlin.incremental=false" >> ~/.gradle/gradle.properties
+        echo "kotlin.compiler.execution.strategy=in-process" >> ~/.gradle/gradle.properties
 
     - name: Perbaiki Kode (AppConfig)
       run: |
@@ -90,16 +98,15 @@ jobs:
         INNEREOF
         done
 
-    - name: Build and Capture Log
+    - name: Build APK (Tanpa Optimasi Kotlin)
       working-directory: ./V2rayNG
       run: |
-        # Sesuai saran Copilot: Simpan log ke file
-        ./gradlew assembleFdroidDebug --no-daemon -i 2>&1 | tee build_detailed.log
+        chmod +x gradlew
+        ./gradlew clean assembleFdroidDebug --stacktrace --no-daemon
 
-    - name: Upload APK & Logs
+    - name: Upload Logs on Failure
+      if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: Build-Result-Misi31
-        path: |
-          V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
-          V2rayNG/build_detailed.log
+        name: Error-Stacktrace-Misi32
+        path: V2rayNG/app/build/reports/problems/
