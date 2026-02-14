@@ -13,10 +13,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
 
     - name: Ambil Jantung VPN
@@ -27,7 +27,6 @@ jobs:
     - name: Perbaiki Kode Otomatis
       run: |
         mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang/
-        # Kita pakai versi AppConfig yang paling aman
         cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
         package com.v2ray.ang
         object AppConfig {
@@ -65,20 +64,20 @@ jobs:
         }
         INNEREOF
 
-    - name: Siapkan Lingkungan (Versi Stabil)
+    - name: Siapkan Lingkungan (Wajib 9.1.0)
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        # Kita pakai Gradle 8.7 yang lebih stabil untuk v2rayNG
-        sed -i 's/gradle-.*-bin.zip/gradle-8.7-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
+        # Paksa balik ke 9.1.0 karena sistem memintanya
+        sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK Final Bismillah Sukses
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V18
+        name: VPN-BRI-V19
         path: V2rayNG/app/build/outputs/apk/debug/*.apk
