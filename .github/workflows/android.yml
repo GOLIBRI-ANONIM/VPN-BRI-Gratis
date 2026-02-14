@@ -110,14 +110,14 @@ jobs:
 
     - name: Upload APK
       if: success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: VPN-BRI-V34-FINAL
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
 
     - name: Upload Error Logs
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Build-Error-Log
         path: V2rayNG/build.log
