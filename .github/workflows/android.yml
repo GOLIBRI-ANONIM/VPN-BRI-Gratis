@@ -29,9 +29,11 @@ jobs:
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
+        # Paksa Gradle pakai versi stabil (8.7)
+        sed -i 's/gradle-9.2.1-bin.zip/gradle-8.7-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK (Mode Cepat)
+    - name: Build APK (Mode Stabil)
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
