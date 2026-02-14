@@ -24,9 +24,8 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode Semua Varian
+    - name: Perbaiki Kode (Full Config)
       run: |
-        # Buat daftar folder tujuan yang mungkin diminta sistem
         FOLDERS=(
           "V2rayNG/app/src/main/java/com/v2ray/ang"
           "V2rayNG/app/src/fdroid/java/com/v2ray/ang"
@@ -38,6 +37,7 @@ jobs:
           cat <<INNEREOF > "$dir/AppConfig.kt"
         package com.v2ray.ang
         object AppConfig {
+            const val ANG_PACKAGE = "com.v2ray.ang"
             const val TAG_PROXY = "proxy"
             const val TAG_DIRECT = "direct"
             const val TAG_BLOCKED = "block"
@@ -69,6 +69,25 @@ jobs:
             const val RAY_NG_CHANNEL_NAME = "v2rayNG"
             const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
             const val WIREGUARD_LOCAL_MTU = 1420
+            
+            // Tambahan untuk memperbaiki error log tadi
+            const val TAG = "v2rayNG"
+            const val PREF_MODE = "pref_mode"
+            const val PREF_VPN_DNS = "pref_vpn_dns"
+            const val PREF_SOCKS_PORT = "pref_socks_port"
+            const val PREF_HTTP_PORT = "pref_http_port"
+            const val PREF_ALLOW_INSECURE = "pref_allow_insecure"
+            const val PREF_MUX_ENABLED = "pref_mux_enabled"
+            const val PREF_FRAGMENT_ENABLED = "pref_fragment_enabled"
+            const val SUBSCRIPTION_AUTO_UPDATE = "pref_subscription_auto_update"
+            const val VPN = "VPN"
+            const val HTTP = "http"
+            const val TLS = "tls"
+            const val HY2 = "hy2"
+            const val DNS_DIRECT = "1.1.1.1"
+            const val DNS_PROXY = "8.8.8.8"
+            const val DELAY_TEST_URL = "https://www.google.com/generate_204"
+            const val VPN_MTU = 1500
         }
         INNEREOF
         done
@@ -80,12 +99,12 @@ jobs:
         sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK (Hanya Satu Varian Biar Cepat)
+    - name: Build APK Final
       working-directory: ./V2rayNG
       run: ./gradlew assembleFdroidDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-V20
+        name: VPN-BRI-V21-Sukses
         path: V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
