@@ -24,12 +24,10 @@ jobs:
         mkdir -p V2rayNG/app/libs
         curl -L https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar -o V2rayNG/app/libs/libv2ray.aar
 
-    - name: Perbaiki Kode yang Hilang
+    - name: Perbaiki Kode Secara Massal
       run: |
-        # Membuat folder jika belum ada
         mkdir -p V2rayNG/app/src/main/java/com/v2ray/ang/
-        
-        # Membuat file AppConfig minimalis supaya error "Unresolved reference" hilang
+        # Membuat file AppConfig yang LEBIH LENGKAP agar semua Unresolved Reference hilang
         cat <<INNEREOF > V2rayNG/app/src/main/java/com/v2ray/ang/AppConfig.kt
         package com.v2ray.ang
         object AppConfig {
@@ -37,8 +35,10 @@ jobs:
             const val TAG_DIRECT = "direct"
             const val TAG_BLOCKED = "block"
             const val TAG_DNS = "dns"
+            const val TAG_DOMESTIC_DNS = "domestic_dns"
             const val LOOPBACK = "127.0.0.1"
             const val PORT_SOCKS = "10808"
+            const val PORT_HTTP = "10809"
             const val DEFAULT_PORT = 443
             const val DEFAULT_LEVEL = 0
             const val DEFAULT_NETWORK = "tcp"
@@ -56,10 +56,50 @@ jobs:
             const val MSG_STATE_RUNNING = 10
             const val MSG_STATE_NOT_RUNNING = 11
             const val MSG_STATE_START = 12
+            const val MSG_STATE_START_FAILURE_TYPE = 13
+            const val MSG_STATE_STOP_FAILURE = 14
             const val RAY_NG_CHANNEL_ID = "v2rayng_channel"
             const val RAY_NG_CHANNEL_NAME = "v2rayNG"
             const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
             const val WIREGUARD_LOCAL_MTU = 1420
+            const val HY2 = "hysteria2"
+            const val CUSTOM = "custom"
+            const val SOCKS = "socks"
+            const val HTTP = "http"
+            const val HYSTERIA2 = "hysteria2"
+            const val HYSTERIA = "hysteria"
+            const val TLS = "tls"
+            const val REALITY = "reality"
+            const val DEFAULT_SECURITY_VMESS = "auto"
+            const val GEOIP_PRIVATE = "private"
+            const val GEOSITE_PRIVATE = "private"
+            const val GEOSITE_CN = "cn"
+            const val GEOIP_CN = "cn"
+            const val DNS_DIRECT = "1.1.1.1"
+            const val DNS_PROXY = "8.8.8.8"
+            const val DNS_VPN = "1.1.1.1"
+            const val DELAY_TEST_URL2 = "http://www.google.com/generate_204"
+            const val HEVTUN_RW_TIMEOUT = 15000
+            const val SUBSCRIPTION_UPDATE_CHANNEL = "subscription_update"
+            const val SUBSCRIPTION_UPDATE_CHANNEL_NAME = "Subscription Update"
+            const val APP_API_URL = "https://api.github.com/repos/2dust/v2rayNG/releases/latest"
+            const val GOOGLEAPIS_CN_DOMAIN = "googleapis.cn"
+            const val GOOGLEAPIS_COM_DOMAIN = "googleapis.com"
+            const val DNS_ALIDNS_DOMAIN = "dns.alidns.com"
+            const val DNS_ALIDNS_ADDRESSES = "223.5.5.5"
+            const val DNS_CLOUDFLARE_ONE_DOMAIN = "one.one.one.one"
+            const val DNS_CLOUDFLARE_ONE_ADDRESSES = "1.1.1.1"
+            const val DNS_CLOUDFLARE_DNS_COM_DOMAIN = "cloudflare-dns.com"
+            const val DNS_CLOUDFLARE_DNS_COM_ADDRESSES = "1.0.0.1"
+            const val DNS_CLOUDFLARE_DNS_DOMAIN = "1.1.1.1"
+            const val DNS_CLOUDFLARE_DNS_ADDRESSES = "1.1.1.1"
+            const val DNS_DNSPOD_DOMAIN = "doh.pub"
+            const val DNS_DNSPOD_ADDRESSES = "1.12.12.12"
+            const val DNS_GOOGLE_DOMAIN = "dns.google"
+            const val DNS_QUAD9_DOMAIN = "dns.quad9.net"
+            const val DNS_QUAD9_ADDRESSES = "9.9.9.9"
+            const val DNS_YANDEX_DOMAIN = "dns.yandex.ru"
+            const val DNS_YANDEX_ADDRESSES = "77.88.8.8"
         }
         INNEREOF
 
@@ -67,15 +107,16 @@ jobs:
       working-directory: ./V2rayNG
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
+        # Paksa Gradle 9.1.0 lagi
         sed -i 's/gradle-.*-bin.zip/gradle-9.1.0-bin.zip/g' gradle/wrapper/gradle-wrapper.properties || true
         chmod +x gradlew
 
-    - name: Build APK Final
+    - name: Build APK Final Bismillah
       working-directory: ./V2rayNG
       run: ./gradlew assembleDebug -x lint -x test --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: VPN-BRI-Super-Gratis-v15
+        name: VPN-BRI-Super-Gratis-v16
         path: V2rayNG/app/build/outputs/apk/debug/*.apk
